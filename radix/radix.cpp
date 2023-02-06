@@ -251,7 +251,7 @@ void RadixTreeRoot::free_tree() {
         free(content);
     }
     free(node);
-    node = nullptr;
+    node = (RadixTreeNode*)calloc(1, sizeof(RadixTreeNode));
     lock.unlock();
     free_node_children(children, children_len);
 }
