@@ -41,11 +41,10 @@ func (e *eventDispatcher) removeWriter(w io.Writer) {
 	e.writers = e.writers[:len(e.writers)-1]
 }
 
-var n4 = []byte{0, 0, 0, 0}
+var n5 = []byte{0, 0, 0, 0, 0}
 
 func (e *eventDispatcher) dispatch(event []byte, except io.Writer) {
-	event = packetmaker.New().Bytes(n4).
-		Uint32(uint32(len(event)), true).Make()
+	event = packetmaker.New().Uint32(uint32(len(event)), true).Bytes(n5).Make()
 	e.mu.RLock()
 	defer e.mu.RUnlock()
 	for _, v := range e.writers {
@@ -260,6 +259,7 @@ func processPacket(
 			"Mutex was already unlocked.")
 	case 9:
 		// Event send.
+		packet = packet[1:]
 		dispatcher.dispatch(packet, conn)
 		returnResult([]byte{}, false)
 	default:
@@ -358,6 +358,6 @@ func spawnHnpHandler(conn net.Conn) {
 		}
 
 		// Process the packet.
-		go processPacket(conn, packet, replyId, db, mu, dispatcher)
+		processPacket(conn, packet, replyId, db, mu, dispatcher)
 	}
 }
